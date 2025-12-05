@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DaiP智能聊天室 - 登录/注册</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+        function toggleMode() {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const toggleBtn = document.getElementById('toggle-btn');
+            const title = document.querySelector('.login-box h2');
+            
+            if (loginForm.style.display === 'none') {
+                // 切换到登录模式
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                toggleBtn.textContent = '没有账号？点击注册';
+                title.textContent = 'DaiP智能聊天室 - 登录';
+            } else {
+                // 切换到注册模式
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                toggleBtn.textContent = '已有账号？点击登录';
+                title.textContent = 'DaiP智能聊天室 - 注册';
+            }
+        }
+        
+        window.onload = function() {
+            // 默认显示登录表单
+            document.getElementById('register-form').style.display = 'none';
+        };
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h2>DaiP智能聊天室 - 登录</h2>
+            {% if error %}
+            <div class="error-message">{{ error }}</div>
+            {% endif %}
+            {% if success %}
+            <div class="success-message">{{ success }}</div>
+            {% endif %}
+            
+            <!-- 登录表单 -->
+            <form id="login-form" action="/login" method="POST">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" placeholder="请输入密码" required>
+                </div>
+                <div class="form-group">
+                    <label for="server">服务器地址</label>
+                    <select id="server" name="server" required>
+                        {% for server in servers %}
+                        <option value="{{ server }}">{{ server }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="login-btn">登录</button>
+            </form>
+            
+            <!-- 注册表单 -->
+            <form id="register-form" action="/register" method="POST" style="display: none;">
+                <div class="form-group">
+                    <label for="reg-username">用户名</label>
+                    <input type="text" id="reg-username" name="username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">密码</label>
+                    <input type="password" id="reg-password" name="password" placeholder="请输入密码" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-confirm">确认密码</label>
+                    <input type="password" id="reg-confirm" name="confirm_password" placeholder="请再次输入密码" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-nickname">昵称</label>
+                    <input type="text" id="reg-nickname" name="nickname" placeholder="请输入您的昵称" required>
+                </div>
+                <button type="submit" class="login-btn">注册</button>
+            </form>
+            
+            <button id="toggle-btn" class="toggle-btn" onclick="toggleMode()">
+                没有账号？点击注册
+            </button>
+        </div>
+    </div>
+</body>
+</html>

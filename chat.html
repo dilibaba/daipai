@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>DaiP智能聊天室</title>
+        <link rel="stylesheet" href="/static/css/style.css">
+        <style>
+            /* 音乐卡片样式 */
+            .music-container {
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                border-radius: 12px;
+                padding: 20px;
+                margin-top: 10px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            
+            .music-container:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            }
+            
+            .music-info {
+                display: flex;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+            
+            .music-image {
+                width: 80px;
+                height: 80px;
+                border-radius: 8px;
+                object-fit: cover;
+                margin-right: 15px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            }
+            
+            .music-details {
+                flex: 1;
+            }
+            
+            .music-title {
+                margin: 0 0 5px 0;
+                font-size: 18px;
+                font-weight: bold;
+                color: #333;
+            }
+            
+            .music-artist {
+                margin: 0;
+                font-size: 14px;
+                color: #666;
+            }
+            
+            .music-controls {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .music-control-btn {
+                background-color: #fff;
+                border: 1px solid #ddd;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+            
+            .music-control-btn:hover {
+                background-color: #2196f3;
+                color: white;
+                border-color: #2196f3;
+                transform: scale(1.1);
+            }
+            
+            .music-progress-container {
+                width: 100%;
+                height: 6px;
+                background-color: #ddd;
+                border-radius: 3px;
+                overflow: hidden;
+                position: relative;
+            }
+            
+            .music-progress-bar {
+                height: 100%;
+                background: linear-gradient(90deg, #2196f3 0%, #64b5f6 100%);
+                transition: width 0.1s ease;
+                border-radius: 3px;
+            }
+            
+            @media (max-width: 768px) {
+                .music-image {
+                    width: 60px;
+                    height: 60px;
+                }
+                
+                .music-title {
+                    font-size: 16px;
+                }
+                
+                .music-control-btn {
+                    width: 36px;
+                    height: 36px;
+                    font-size: 14px;
+                }
+            }
+        </style>
+    </head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-left">
+                <button id="sidebar-toggle" class="sidebar-toggle">☰</button>
+                <h2>DaiP智能聊天室</h2>
+            </div>
+            <div class="user-info">
+                <span>当前用户：{{ nickname }}</span>
+                <button id="logout-btn" class="logout-btn">退出</button>
+            </div>
+        </div>
+        
+        <div class="chat-main">
+            <!-- 在线用户列表 -->
+            <div class="users-sidebar">
+                <div class="sidebar-header">
+                    <h3>在线用户 ( <span id="users-count">0</span> )</h3>
+                </div>
+                <div class="users-list" id="users-list">
+                    <!-- 在线用户将通过JavaScript动态添加 -->
+                </div>
+            </div>
+            
+            <!-- 聊天消息区域 -->
+            <div class="chat-messages" id="chat-messages">
+                <div class="welcome-message">欢迎来到DaiP智能聊天室！</div>
+                <div class="help-message">提示：使用@电影 URL可以分享电影，使用@川小农 可以与AI对话，使用@音乐 可以播放音乐，使用@天气 可以查询天气，使用@新闻 可以查询新闻</div>
+            </div>
+        </div>
+        
+        <div class="chat-footer">
+            <div class="message-input-container">
+                <input type="text" id="message-input" placeholder="输入消息... (使用@电影 URL分享电影)" autocomplete="off">
+                <button id="send-btn" class="send-btn">发送</button>
+            </div>
+            <div class="emoji-dropdown">
+                <button id="emoji-toggle" class="emoji-toggle">😊 表情</button>
+                <div id="emoji-panel" class="emoji-panel">
+                    <div class="emoji-scroll-container">
+                        <!-- emoji表情列表 -->
+                        <span class="emoji" data-emoji="😀">😀</span>
+                        <span class="emoji" data-emoji="😂">😂</span>
+                        <span class="emoji" data-emoji="😍">😍</span>
+                        <span class="emoji" data-emoji="😎">😎</span>
+                        <span class="emoji" data-emoji="👍">👍</span>
+                        <span class="emoji" data-emoji="❤️">❤️</span>
+                        <span class="emoji" data-emoji="🎉">🎉</span>
+                        <span class="emoji" data-emoji="🔥">🔥</span>
+                        <span class="emoji" data-emoji="😆">😆</span>
+                        <span class="emoji" data-emoji="🥰">🥰</span>
+                        <span class="emoji" data-emoji="😘">😘</span>
+                        <span class="emoji" data-emoji="🤔">🤔</span>
+                        <span class="emoji" data-emoji="😢">😢</span>
+                        <span class="emoji" data-emoji="😡">😡</span>
+                        <span class="emoji" data-emoji="🤩">🤩</span>
+                        <span class="emoji" data-emoji="🤗">🤗</span>
+                        <span class="emoji" data-emoji="😏">😏</span>
+                        <span class="emoji" data-emoji="🙄">🙄</span>
+                        <span class="emoji" data-emoji="😴">😴</span>
+                        <span class="emoji" data-emoji="😱">😱</span>
+                        <span class="emoji" data-emoji="🥳">🥳</span>
+                        <span class="emoji" data-emoji="🤭">🤭</span>
+                        <span class="emoji" data-emoji="😷">😷</span>
+                        <span class="emoji" data-emoji="🤞">🤞</span>
+                        <span class="emoji" data-emoji="🤟">🤟</span>
+                        <span class="emoji" data-emoji="👏">👏</span>
+                        <span class="emoji" data-emoji="🙏">🙏</span>
+                        <span class="emoji" data-emoji="🎊">🎊</span>
+                        <span class="emoji" data-emoji="🎁">🎁</span>
+                        <span class="emoji" data-emoji="🌸">🌸</span>
+                        <span class="emoji" data-emoji="🌟">🌟</span>
+                        <span class="emoji" data-emoji="🌈">🌈</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // 用户信息
+        const nickname = '{{ nickname }}';
+        const server = '{{ server }}';
+        
+        // 连接WebSocket
+        const socket = io();
+        
+        // 页面元素
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const usersList = document.getElementById('users-list');
+        const usersCount = document.getElementById('users-count');
+        const emojiButtons = document.querySelectorAll('.emoji');
+        const emojiToggle = document.getElementById('emoji-toggle');
+        const emojiPanel = document.getElementById('emoji-panel');
+        
+        // 创建音频元素用于播放音乐
+        let audioPlayer = null;
+        let currentMusicId = null;
+        let isSeeking = false; // 用于跟踪是否正在拖动进度条
+        
+        // 发送消息函数
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                const timestamp = new Date().toLocaleString('zh-CN');
+                
+                // 发送消息到服务器
+                socket.emit('send_message', {
+                    nickname: nickname,
+                    message: message,
+                    timestamp: timestamp
+                });
+                
+                messageInput.value = '';
+            }
+        }
+        
+        // 显示新闻列表函数
+        function showNewsList(nickname, newsList) {
+            const chatMessages = document.getElementById('chat-messages');
+            
+            // 创建消息头部
+            const messageHeader = document.createElement('div');
+            messageHeader.classList.add('message-header', 'message-header-ai');
+            messageHeader.innerHTML = `<strong>${nickname}</strong> <span class="message-time">${new Date().toLocaleString('zh-CN')}</span>`;
+            
+            // 创建消息容器
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('message-wrapper');
+            messageWrapper.appendChild(messageHeader);
+            
+            // 创建新闻容器
+            const newsContainer = document.createElement('div');
+            newsContainer.className = 'news-list';
+            
+            // 添加新闻标题
+            const newsTitle = document.createElement('div');
+            newsTitle.className = 'news-title';
+            newsTitle.textContent = '📰 今日热点新闻';
+            newsContainer.appendChild(newsTitle);
+            
+            // 添加新闻列表
+            newsList.forEach((news, index) => {
+                const newsItem = document.createElement('a');
+                newsItem.href = news.url;
+                newsItem.target = '_blank';
+                newsItem.className = 'news-item';
+                
+                // 新闻排名
+                const newsRank = document.createElement('span');
+                newsRank.className = 'news-rank';
+                newsRank.textContent = news.index || (index + 1);
+                
+                // 新闻内容
+                const newsContent = document.createElement('div');
+                newsContent.className = 'news-content';
+                
+                // 标题和热度
+                const titleRow = document.createElement('div');
+                titleRow.className = 'news-title-row';
+                
+                const title = document.createElement('span');
+                title.className = 'news-item-title';
+                title.textContent = news.title;
+                
+                const hot = document.createElement('span');
+                hot.className = 'news-hot';
+                hot.textContent = `🔥${news.hot}`;
+                
+                titleRow.appendChild(title);
+                titleRow.appendChild(hot);
+                
+                // 描述
+                if (news.desc) {
+                    const desc = document.createElement('div');
+                    desc.className = 'news-desc';
+                    desc.textContent = news.desc;
+                    newsContent.appendChild(desc);
+                }
+                
+                // 图片
+                if (news.img) {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'news-img-container';
+                    const img = document.createElement('img');
+                    img.src = news.img;
+                    img.alt = news.title;
+                    img.className = 'news-img';
+                    imgContainer.appendChild(img);
+                    newsItem.appendChild(imgContainer);
+                }
+                
+                newsContent.appendChild(titleRow);
+                newsItem.appendChild(newsRank);
+                newsItem.appendChild(newsContent);
+                newsContainer.appendChild(newsItem);
+            });
+            
+            messageWrapper.appendChild(newsContainer);
+            chatMessages.appendChild(messageWrapper);
+            
+            // 自动滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 显示消息函数
+        function displayMessage(data) {
+            // 创建消息头部，根据用户类型设置不同位置
+            const messageHeader = document.createElement('div');
+            messageHeader.classList.add('message-header');
+            
+            // 为AI昵称添加特殊样式类，放置在左上角
+                if (data.nickname === '川小农' || data.nickname === '天气' || data.nickname === '音乐助手') {
+                messageHeader.classList.add('message-header-ai');
+                messageHeader.innerHTML = `<strong>${data.nickname}</strong> <span class="message-time">${data.timestamp}</span>`;
+            } else {
+                // 普通用户昵称保持在右上角
+                messageHeader.innerHTML = `<span class="message-time">${data.timestamp}</span> <strong>${data.nickname}</strong>`;
+            }
+            
+            // 创建消息容器
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('message-wrapper');
+            
+            // 根据消息类型创建不同的内容元素
+            if (data.type === 'ai_chat_response') {
+                // 处理新闻小助手的消息
+                if (data.nickname === '新闻' && typeof data.content === 'object' && data.content.news) {
+                    // 显示新闻列表
+                    messageWrapper.appendChild(messageHeader);
+                    
+                    // 创建新闻容器
+                    const newsContainer = document.createElement('div');
+                    newsContainer.className = 'news-list';
+                    
+                    // 添加新闻标题
+                    const newsTitle = document.createElement('div');
+                    newsTitle.className = 'news-title';
+                    newsTitle.textContent = '📰 今日热点新闻';
+                    newsContainer.appendChild(newsTitle);
+                    
+                    // 添加新闻列表
+                    data.content.news.forEach((news, index) => {
+                        const newsItem = document.createElement('a');
+                        newsItem.href = news.url;
+                        newsItem.target = '_blank';
+                        newsItem.className = 'news-item';
+                        
+                        // 新闻排名
+                        const newsRank = document.createElement('span');
+                        newsRank.className = 'news-rank';
+                        newsRank.textContent = news.index || (index + 1);
+                        
+                        // 新闻内容
+                        const newsContent = document.createElement('div');
+                        newsContent.className = 'news-content';
+                        
+                        // 标题和热度
+                        const titleRow = document.createElement('div');
+                        titleRow.className = 'news-title-row';
+                        
+                        const title = document.createElement('span');
+                        title.className = 'news-item-title';
+                        title.textContent = news.title;
+                        
+                        const hot = document.createElement('span');
+                        hot.className = 'news-hot';
+                        hot.textContent = `🔥${news.hot}`;
+                        
+                        titleRow.appendChild(title);
+                        titleRow.appendChild(hot);
+                        
+                        // 描述
+                        if (news.desc) {
+                            const desc = document.createElement('div');
+                            desc.className = 'news-desc';
+                            desc.textContent = news.desc;
+                            newsContent.appendChild(desc);
+                        }
+                        
+                        // 图片
+                        if (news.img) {
+                            const imgContainer = document.createElement('div');
+                            imgContainer.className = 'news-img-container';
+                            const img = document.createElement('img');
+                            img.src = news.img;
+                            img.alt = news.title;
+                            img.className = 'news-img';
+                            imgContainer.appendChild(img);
+                            newsItem.appendChild(imgContainer);
+                        }
+                        
+                        newsContent.appendChild(titleRow);
+                        newsItem.appendChild(newsRank);
+                        newsItem.appendChild(newsContent);
+                        newsContainer.appendChild(newsItem);
+                    });
+                    
+                    messageWrapper.appendChild(newsContainer);
+                } else {
+                    // 其他AI回复消息 - 去掉气泡，直接显示内容
+                    const aiContent = document.createElement('div');
+                    aiContent.classList.add('ai-response');
+                    aiContent.textContent = data.content;
+                    
+                    messageWrapper.appendChild(messageHeader);
+                    messageWrapper.appendChild(aiContent);
+                }
+            } else {
+                // 普通消息和电影消息 - 保留气泡
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                
+                if (data.nickname === nickname) {
+                    messageElement.classList.add('message-self');
+                }
+                
+                const messageContent = document.createElement('div');
+                messageContent.classList.add('message-content');
+                
+                if (data.type === 'movie') {
+                    // 电影类型消息，显示iframe
+                    messageContent.innerHTML = `
+                        <div class="movie-container">
+                            <p>分享了一部电影：${data.message}</p>
+                            <iframe src="${data.content}" class="movie-iframe" width="400" height="400" allowfullscreen></iframe>
+                        </div>
+                    `;
+                } else if (data.type === 'weather') {
+                    // 天气类型消息，特殊格式化显示
+                    messageContent.innerHTML = `
+                        <div class="weather-container">
+                            <p class="weather-title">查询了天气信息</p>
+                            <pre class="weather-info">${data.content}</pre>
+                        </div>
+                    `;
+                } else if (data.type === 'music' && typeof data.content === 'object') {
+                    // 音乐类型消息，显示音乐卡片
+                    // 创建音乐卡片，包含ID以便跟踪
+                    const musicId = data.content.id || Date.now();
+                    messageContent.innerHTML = `
+                        <div class="music-container" data-music-id="${musicId}" data-music-url="${data.content.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'}">
+                            <div class="music-info">
+                                <img class="music-image" src="${data.content.image || 'https://via.placeholder.com/150'}" alt="专辑封面">
+                                <div class="music-details">
+                                    <h4 class="music-title">${data.content.name}</h4>
+                                    <p class="music-artist">${data.content.artist}</p>
+                                    ${data.content.status ? `<span class="music-status">状态: ${getReadableStatus(data.content.status)}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="music-controls">
+                                <button class="music-control-btn" data-action="play" title="播放">▶️</button>
+                                <button class="music-control-btn" data-action="pause" title="暂停">⏸️</button>
+                                <button class="music-control-btn" data-action="stop" title="停止">⏹️</button>
+                            </div>
+                            <div class="music-progress-container">
+                                <div class="music-progress-bar" style="width: ${data.content.progress || 0}%"></div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // 普通文本消息
+                    messageContent.textContent = data.message;
+                }
+                
+                messageElement.appendChild(messageContent);
+                messageWrapper.appendChild(messageHeader);
+                messageWrapper.appendChild(messageElement);
+            }
+            
+            chatMessages.appendChild(messageWrapper);
+            
+            // 自动滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 更新在线用户列表
+        function updateUsersList(users) {
+            usersList.innerHTML = '';
+            usersCount.textContent = users.length;
+            
+            users.forEach(user => {
+                const userElement = document.createElement('div');
+                userElement.classList.add('user-item');
+                if (user === nickname) {
+                    userElement.classList.add('user-self');
+                    userElement.innerHTML = `<span class="user-dot"></span> ${user} (我)`;
+                } else {
+                    userElement.innerHTML = `<span class="user-dot"></span> ${user}`;
+                }
+                usersList.appendChild(userElement);
+            });
+        }
+        
+        // 事件监听 (将在页面底部重写以添加音乐状态请求)
+        
+        // Emoji面板切换功能
+        emojiToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // 防止点击按钮时触发文档点击事件
+            emojiPanel.classList.toggle('active');
+        });
+        
+        // 点击文档其他地方关闭emoji面板
+        document.addEventListener('click', () => {
+            if (emojiPanel.classList.contains('active')) {
+                emojiPanel.classList.remove('active');
+            }
+        });
+        
+        // 点击emoji面板内部不关闭面板
+        emojiPanel.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        // Emoji点击事件（使用事件委托优化性能）
+        emojiPanel.addEventListener('click', (e) => {
+            if (e.target.classList.contains('emoji')) {
+                const emoji = e.target.getAttribute('data-emoji');
+                messageInput.value += emoji;
+                messageInput.focus();
+            }
+        });
+        
+        // 确保在页面加载完成后立即初始化用户列表
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('页面加载完成，等待用户列表更新');
+            
+            // 侧边栏切换
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const usersSidebar = document.querySelector('.users-sidebar');
+            
+            if (sidebarToggle && usersSidebar) {
+                sidebarToggle.addEventListener('click', function() {
+                    usersSidebar.classList.toggle('active');
+                });
+            }
+        });
+        
+        // 接收新消息
+        socket.on('new_message', (data) => {
+            displayMessage(data);
+            
+            // 处理天气类型，更改聊天框背景颜色
+            if (data.nickname === '天气' && data.weather_type) {
+                const chatMessages = document.getElementById('chat-messages');
+                // 移除所有天气相关的类
+                chatMessages.classList.remove('weather-sunny', 'weather-cloudy', 'weather-rainy');
+                // 添加当前天气类型的类
+                chatMessages.classList.add(`weather-${data.weather_type}`);
+                
+                // 30秒后恢复默认背景
+                setTimeout(() => {
+                    chatMessages.classList.remove('weather-sunny', 'weather-cloudy', 'weather-rainy');
+                }, 30000);
+            }
+        });
+        
+        // 用户加入
+        socket.on('user_joined', (data) => {
+            updateUsersList(data.users);
+            
+            // 显示系统消息
+            const systemMessage = document.createElement('div');
+            systemMessage.classList.add('system-message');
+            systemMessage.textContent = `${data.nickname} 加入了聊天室`;
+            chatMessages.appendChild(systemMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+        
+        // 用户离开
+        socket.on('user_left', (data) => {
+            updateUsersList(data.users);
+            
+            // 显示系统消息
+            const systemMessage = document.createElement('div');
+            systemMessage.classList.add('system-message');
+            systemMessage.textContent = `${data.nickname} 离开了聊天室`;
+            chatMessages.appendChild(systemMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+        
+        // 监听用户列表更新事件（专门针对新加入的用户）
+        socket.on('update_users', (data) => {
+            console.log('接收到用户列表更新:', data.users);
+            updateUsersList(data.users);
+        });
+        
+        // 监听音乐更新事件
+        socket.on('music_updated', (data) => {
+            console.log('接收到音乐更新:', data);
+            
+            // 更新当前音乐ID
+            currentMusicId = data.id || Date.now();
+            
+            // 直接显示音乐助手消息和音乐卡片
+            displayMessage({
+                nickname: '音乐助手',
+                message: data.name ? `正在播放音乐: ${data.name} - ${data.artist}` : '正在播放随机音乐',
+                type: 'music',
+                content: data,
+                timestamp: new Date().toLocaleString('zh-CN')
+            });
+            
+            // 更新界面上现有的音乐卡片信息
+            updateMusicCardInfo(data);
+            
+            // 清理之前的音频播放器
+            if (audioPlayer) {
+                audioPlayer.pause();
+                audioPlayer.removeEventListener('timeupdate', updateMusicProgress);
+                audioPlayer.removeEventListener('ended', handleMusicEnded);
+                audioPlayer = null;
+            }
+            
+            // 创建新的音频元素（如果有有效的URL）
+            // 使用默认URL或提供的URL
+            const audioUrl = data.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+            
+            try {
+                console.log('创建音频元素，URL:', audioUrl);
+                audioPlayer = new Audio(audioUrl);
+                
+                // 确保音量设置为最大
+                audioPlayer.volume = 1.0;
+                console.log('音频元素已创建，音量设置为:', audioPlayer.volume);
+                
+                // 添加事件监听器
+                audioPlayer.addEventListener('timeupdate', updateMusicProgress);
+                audioPlayer.addEventListener('ended', handleMusicEnded);
+                
+                // 添加加载完成事件
+                audioPlayer.addEventListener('loadedmetadata', () => {
+                    console.log('音频元数据已加载:', { 
+                        duration: audioPlayer.duration,
+                        readyState: audioPlayer.readyState
+                    });
+                });
+                
+                // 添加canplay事件
+                audioPlayer.addEventListener('canplay', () => {
+                    console.log('音频可以开始播放');
+                });
+                
+                // 增强的错误事件监听
+                audioPlayer.addEventListener('error', function(e) {
+                    const errorCode = e.target.error ? e.target.error.code : 'Unknown';
+                    const errorTypes = ['', '中止', '网络错误', '解码错误', '格式不支持'];
+                    const errorText = errorTypes[errorCode] || '未知错误';
+                    
+                    console.error('音频加载错误:', e, '错误代码:', errorCode, '(', errorText, ')');
+                    
+                    // 显示更详细的错误提示给用户
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'music-error-message';
+                    errorMessage.textContent = `音频加载失败(${errorText})，请点击播放按钮重试`;
+                    errorMessage.style.color = 'red';
+                    errorMessage.style.marginTop = '5px';
+                    errorMessage.style.fontSize = '12px';
+                    
+                    // 将错误消息添加到最新的音乐卡片
+                    const musicContainers = document.querySelectorAll('.music-container');
+                    if (musicContainers.length > 0) {
+                        const latestContainer = musicContainers[musicContainers.length - 1];
+                        // 移除已存在的错误消息
+                        const existingError = latestContainer.querySelector('.music-error-message');
+                        if (existingError) existingError.remove();
+                        latestContainer.appendChild(errorMessage);
+                    }
+                });
+                
+                // 尝试预加载
+                audioPlayer.load();
+                
+                // 如果音乐状态是playing，则尝试播放
+                if (data.status === 'playing') {
+                    audioPlayer.play().catch(error => {
+                        console.error('自动播放音乐失败（可能被浏览器策略阻止）:', error);
+                        console.log('提示：请点击播放按钮手动播放音乐');
+                        // 不自动设置为暂停，让用户可以手动点击播放
+                    });
+                }
+            } catch (error) {
+                console.error('创建音频播放器失败:', error);
+                // 显示错误提示
+                alert('音频播放器初始化失败，请刷新页面重试');
+            }
+        });
+        
+        // 音乐播放结束处理函数
+        function handleMusicEnded() {
+            console.log('音乐播放结束');
+            socket.emit('music_control', { action: 'stop' });
+        }
+        
+        // 更新音乐卡片信息的函数
+        function updateMusicCardInfo(data) {
+            const musicContainers = document.querySelectorAll('.music-container');
+            
+            // 如果有现有音乐卡片，更新它们
+            if (musicContainers.length > 0) {
+                musicContainers.forEach(container => {
+                    // 更新音乐信息
+                    const titleElement = container.querySelector('.music-title');
+                    const artistElement = container.querySelector('.music-artist');
+                    const statusElement = container.querySelector('.music-status');
+                    const imageElement = container.querySelector('.music-image');
+                    
+                    if (titleElement) titleElement.textContent = data.name || '未知歌曲';
+                    if (artistElement) artistElement.textContent = data.artist || '未知艺术家';
+                    if (statusElement) statusElement.textContent = `状态: ${getReadableStatus(data.status)}`;
+                    if (imageElement) imageElement.src = data.image || 'https://via.placeholder.com/150';
+                    
+                    // 更新URL属性，添加默认测试音频URL
+                    container.dataset.musicUrl = data.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+                });
+            } else {
+                // 不再在这里创建新的音乐消息显示，统一由music_updated事件处理器处理
+            }
+        }
+        
+        // 监听音乐状态更新事件
+        socket.on('music_status_updated', (data) => {
+            console.log('接收到音乐状态更新:', data);
+            
+            // 更新当前音乐ID（如果需要）
+            if (data.id) {
+                currentMusicId = data.id;
+            }
+            
+            // 更新进度条 - 只有在非拖动状态才更新
+            if (data.progress !== undefined && !isSeeking) {
+                const progressBars = document.querySelectorAll('.music-progress-bar');
+                progressBars.forEach(bar => {
+                    bar.style.width = `${data.progress}%`;
+                });
+            }
+            
+            // 控制音乐播放状态
+            if (audioPlayer) {
+                try {
+                    if (data.status === 'playing' && audioPlayer.paused) {
+                        audioPlayer.play().catch(error => {
+                            console.error('播放音乐失败:', error);
+                            // 如果播放失败，可能是因为浏览器策略，尝试用户交互后再播放
+                            const playBtn = document.querySelector('.music-control-btn[data-action="play"]');
+                            if (playBtn) {
+                                playBtn.classList.add('play-error'); // 可以添加样式提示用户点击播放
+                            }
+                        });
+                    } else if (data.status === 'paused' && !audioPlayer.paused) {
+                        audioPlayer.pause();
+                    } else if (data.status === 'stopped') {
+                        audioPlayer.pause();
+                        audioPlayer.currentTime = 0;
+                        // 清除所有进度条
+                        const progressBars = document.querySelectorAll('.music-progress-bar');
+                        progressBars.forEach(bar => {
+                            bar.style.width = '0%';
+                        });
+                    }
+                    
+                    // 如果有进度信息且不是用户正在拖动，更新音频进度
+                    if (data.progress !== undefined && !isSeeking && audioPlayer && audioPlayer.duration) {
+                        const newTime = (data.progress / 100) * audioPlayer.duration;
+                        // 只有当差异大于1秒时才更新，避免频繁更新
+                        if (Math.abs(audioPlayer.currentTime - newTime) > 1) {
+                            audioPlayer.currentTime = newTime;
+                        }
+                    }
+                    
+                    // 更新界面上的播放状态显示
+                    const statusElements = document.querySelectorAll('.music-status');
+                    statusElements.forEach(el => {
+                        el.textContent = `状态: ${getReadableStatus(data.status)}`;
+                    });
+                } catch (error) {
+                    console.error('更新音频状态失败:', error);
+                }
+            }
+        });
+        
+        // 更新音乐进度函数
+        function updateMusicProgress() {
+            if (audioPlayer && audioPlayer.duration > 0 && !isSeeking) {
+                const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                socket.emit('music_control', {
+                    action: 'progress',
+                    progress: progress
+                });
+            }
+        }
+        
+        // 发送按钮点击事件
+        sendBtn.addEventListener('click', sendMessage);
+        
+        // 回车键发送消息
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 退出按钮点击事件
+        logoutBtn.addEventListener('click', () => {
+            socket.disconnect();
+            window.location.href = '/';
+        });
+        
+        // Emoji点击事件
+        emojiButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const emoji = button.getAttribute('data-emoji');
+                messageInput.value += emoji;
+                messageInput.focus();
+            });
+        });
+        
+        // 页面关闭时断开连接
+        window.addEventListener('beforeunload', () => {
+            socket.disconnect();
+        });
+        
+        // 为音乐控制按钮添加事件委托监听
+        document.addEventListener('click', (e) => {
+            // 处理音乐控制按钮点击
+            if (e.target.classList.contains('music-control-btn')) {
+                const action = e.target.getAttribute('data-action');
+                
+                // 查找对应的音乐卡片和音乐URL
+                const musicCard = e.target.closest('.music-container');
+                const musicUrl = musicCard ? musicCard.getAttribute('data-music-url') : null;
+                const musicId = musicCard ? musicCard.getAttribute('data-music-id') : null;
+                
+                // 立即在本地处理播放控制，提供即时反馈
+                try {
+                    if (action === 'play') {
+                        if (musicUrl && musicId) {
+                            // 如果是新音乐（ID变化或URL变化），创建新的音频元素
+                                // 添加全局变量记录当前播放的URL
+                                if (!window.currentMusicUrl) window.currentMusicUrl = '';
+                                
+                                if (!audioPlayer || currentMusicId !== musicId || window.currentMusicUrl !== musicUrl) {
+                                // 清理旧的音频元素
+                                if (audioPlayer) {
+                                    audioPlayer.pause();
+                                    audioPlayer = null;
+                                }
+                                
+                                // 创建新的音频元素
+                                audioPlayer = new Audio(musicUrl);
+                                // 立即设置音量为最大，确保有声音
+                                audioPlayer.volume = 1.0;
+                                console.log('创建新音频元素并设置音量为:', audioPlayer.volume);
+                                currentMusicId = musicId;
+                                // 更新当前播放的URL
+                                window.currentMusicUrl = musicUrl;
+                                
+                                // 添加事件监听器
+                                audioPlayer.addEventListener('timeupdate', updateMusicProgress);
+                                audioPlayer.addEventListener('ended', () => {
+                                    // 音乐播放结束时更新状态
+                                    socket.emit('music_control', { action: 'stop' });
+                                });
+                                audioPlayer.addEventListener('error', (err) => {
+                                    console.error('音频播放错误:', err);
+                                    e.target.classList.add('play-error');
+                                });
+                            }
+                            
+                            // 播放音频 - 添加详细调试日志
+                                console.log('用户点击播放按钮，准备播放:', { musicUrl, musicId });
+                                console.log('音频元素状态检查:', { 
+                                    readyState: audioPlayer.readyState,
+                                    networkState: audioPlayer.networkState,
+                                    paused: audioPlayer.paused
+                                });
+                                
+                                // 立即设置音量为最大并记录
+                                audioPlayer.volume = 1.0;
+                                console.log('已设置音频音量为:', audioPlayer.volume);
+                                
+                                // 添加canplaythrough事件监听，确保音频可以流畅播放
+                                const handleCanPlayThrough = () => {
+                                    console.log('音频已加载完成，准备好流畅播放');
+                                    audioPlayer.removeEventListener('canplaythrough', handleCanPlayThrough);
+                                };
+                                audioPlayer.addEventListener('canplaythrough', handleCanPlayThrough);
+                                
+                                // 尝试播放
+                                audioPlayer.play().then(() => {
+                                    console.log('音频播放成功！正在播放:', musicUrl);
+                                    console.log('播放状态确认:', { 
+                                        currentTime: audioPlayer.currentTime,
+                                        duration: audioPlayer.duration,
+                                        paused: audioPlayer.paused
+                                    });
+                                    e.target.classList.remove('play-error');
+                                    
+                                    // 更新界面上的播放状态
+                                    const statusElements = document.querySelectorAll('.music-status');
+                                    statusElements.forEach(el => {
+                                        el.textContent = '状态: 播放中';
+                                    });
+                                }).catch(err => {
+                                    console.error('播放失败:', err.message || err);
+                                    console.error('错误详情:', { 
+                                        errorCode: audioPlayer.error ? audioPlayer.error.code : 'Unknown',
+                                        src: audioPlayer.src,
+                                        networkState: audioPlayer.networkState
+                                    });
+                                    e.target.classList.add('play-error');
+                                    
+                                    // 显示更详细的错误提示
+                                    let errorMessage = '播放失败，请检查网络连接或稍后重试。';
+                                    if (audioPlayer.error) {
+                                        switch(audioPlayer.error.code) {
+                                            case 1: errorMessage += ' (音频加载被中止)'; break;
+                                            case 2: errorMessage += ' (网络连接错误)'; break;
+                                            case 3: errorMessage += ' (解码错误)'; break;
+                                            case 4: errorMessage += ' (音频格式不支持)'; break;
+                                        }
+                                    }
+                                    alert(errorMessage);
+                                });
+                        }
+                    } else if (action === 'pause' && audioPlayer) {
+                        audioPlayer.pause();
+                    } else if (action === 'stop' && audioPlayer) {
+                        audioPlayer.pause();
+                        audioPlayer.currentTime = 0;
+                    }
+                } catch (error) {
+                    console.error('音频控制错误:', error);
+                }
+                
+                // 发送控制事件到服务器，确保所有用户同步
+                socket.emit('music_control', { action: action });
+                
+                // 对于播放按钮，如果有错误提示，清除它
+                if (action === 'play') {
+                    e.target.classList.remove('play-error');
+                }
+            }
+            
+            // 处理进度条点击，允许用户点击进度条改变播放位置
+            else if (e.target.classList.contains('music-progress-container')) {
+                if (!audioPlayer) return;
+                
+                try {
+                    const container = e.target;
+                    const rect = container.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const percent = (clickX / rect.width) * 100;
+                    
+                    // 更新音频进度
+                    audioPlayer.currentTime = (percent / 100) * audioPlayer.duration;
+                    
+                    // 通知服务器进度变化
+                    socket.emit('music_control', {
+                        action: 'progress',
+                        progress: percent
+                    });
+                } catch (error) {
+                    console.error('更新音乐进度失败:', error);
+                }
+            }
+        });
+        
+        // 为进度条添加拖动事件监听，提升用户体验
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('music-progress-bar')) {
+                isSeeking = true;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isSeeking) {
+                isSeeking = false;
+                // 拖动结束后，更新服务器
+                if (audioPlayer && audioPlayer.duration > 0) {
+                    const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                    socket.emit('music_control', {
+                        action: 'progress',
+                        progress: progress
+                    });
+                }
+            }
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isSeeking && e.target.closest('.music-progress-container')) {
+                try {
+                    const container = e.target.closest('.music-progress-container');
+                    const rect = container.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const percent = Math.max(0, Math.min(100, (mouseX / rect.width) * 100));
+                    
+                    // 更新所有进度条显示
+                    const progressBars = document.querySelectorAll('.music-progress-bar');
+                    progressBars.forEach(bar => {
+                        bar.style.width = `${percent}%`;
+                    });
+                    
+                    // 更新音频进度
+                    if (audioPlayer) {
+                        audioPlayer.currentTime = (percent / 100) * audioPlayer.duration;
+                    }
+                } catch (error) {
+                    console.error('拖动进度条失败:', error);
+                }
+            }
+        });
+        
+        // 获取可读的音乐状态文本
+        function getReadableStatus(status) {
+            const statusMap = {
+                'playing': '播放中',
+                'paused': '已暂停',
+                'stopped': '已停止'
+            };
+            return statusMap[status] || status;
+        }
+        
+        // 连接成功后请求当前音乐状态
+        socket.on('connect', () => {
+            console.log('已连接到服务器');
+            // 加入聊天室
+            socket.emit('join', { nickname: nickname, username: '{{ username }}' });
+            // 请求当前音乐状态
+            setTimeout(() => {
+                socket.emit('get_current_music');
+            }, 500); // 延迟一点发送请求，确保连接完全建立
+        });
+        
+        // 监听页面可见性变化，如果用户切换标签页，暂停音乐
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && audioPlayer && !audioPlayer.paused) {
+                // 存储暂停前的状态，以便页面重新可见时恢复
+                sessionStorage.setItem('musicWasPlaying', 'true');
+                socket.emit('music_control', { action: 'pause' });
+            } else if (!document.hidden && sessionStorage.getItem('musicWasPlaying') === 'true') {
+                // 页面重新可见，不自动恢复播放（需要用户交互）
+                sessionStorage.removeItem('musicWasPlaying');
+            }
+        });
+    </script>
+</body>
+</html>
